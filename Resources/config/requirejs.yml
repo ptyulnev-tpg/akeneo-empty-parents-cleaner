@@ -1,0 +1,14 @@
+config:
+    paths:
+        acme/product-cleanup/empty-product-models-widget: acmeproductcleanup/js/empty-product-models-widget
+        acme/product-cleanup/template/empty-product-models-widget: acmeproductcleanup/templates/empty-product-models-widget.html
+        acme/product-cleanup/controller/empty-product-models: acmeproductcleanup/js/controller/empty-product-models
+        acme/product-cleanup/view/empty-product-models: acmeproductcleanup/js/view/empty-product-models
+        acme/product-cleanup/template/empty-product-models: acmeproductcleanup/templates/empty-product-models.html
+
+    config:
+        pim/controller-registry:
+            controllers:
+                acme_empty_product_models_index:
+                    module: acme/product-cleanup/controller/empty-product-models
+                    aclResourceId: pim_enrich_product_index

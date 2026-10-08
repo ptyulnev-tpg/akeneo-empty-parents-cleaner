@@ -1,0 +1,9 @@
+acme_product_cleanup:
+    widget:
+        title: Leere Product Models
+
+batch_jobs:
+    acme_delete_empty_product_models:
+        label: Leere Product Models löschen
+        delete_empty_product_models:
+            label: Leere Product Models löschen

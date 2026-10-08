@@ -1,0 +1,39 @@
+parameters:
+    acme_product_cleanup.job_name: 'acme_delete_empty_product_models'
+    acme_product_cleanup.connector_name: 'Acme Product Cleanup'
+    # Bestehender Typ, damit Process Tracker & Übersetzungen ohne Zusatzaufwand funktionieren
+    acme_product_cleanup.job_type: 'mass_delete'
+
+services:
+    acme_product_cleanup.tasklet.delete_empty_product_models:
+        class: 'Acme\Bundle\ProductCleanupBundle\Job\DeleteEmptyProductModelsTasklet'
+        arguments:
+            - '@Acme\Bundle\ProductCleanupBundle\Service\EmptyProductModelCleaner'
+            - '@akeneo_batch.job_repository'
+
+    acme_product_cleanup.step.delete_empty_product_models:
+        class: '%pim_connector.step.tasklet.class%'
+        arguments:
+            - 'delete_empty_product_models'
+            - '@event_dispatcher'
+            - '@akeneo_batch.job_repository'
+            - '@acme_product_cleanup.tasklet.delete_empty_product_models'
+
+    acme_product_cleanup.job.delete_empty_product_models:
+        class: '%pim_connector.job.simple_job.class%'
+        arguments:
+            - '%acme_product_cleanup.job_name%'
+            - '@event_dispatcher'
+            - '@akeneo_batch.job_repository'
+            -
+                - '@acme_product_cleanup.step.delete_empty_product_models'
+        tags:
+            - { name: akeneo_batch.job, connector: '%acme_product_cleanup.connector_name%', type: '%acme_product_cleanup.job_type%' }
+
+    acme_product_cleanup.job.parameters:
+        class: 'Acme\Bundle\ProductCleanupBundle\Job\JobParameters\DeleteEmptyProductModelsParameters'
+        arguments:
+            - ['%acme_product_cleanup.job_name%']
+        tags:
+            - { name: akeneo_batch.job.job_parameters.constraint_collection_provider }
+            - { name: akeneo_batch.job.job_parameters.default_values_provider }

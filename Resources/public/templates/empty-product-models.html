@@ -1,0 +1,70 @@
+<div class="AknSubsection">
+<% if (error) { %>
+    <div class="AknMessageBox AknMessageBox--error"><%- error %></div>
+<% } else if (null === data) { %>
+    <div class="AknMessageBox AknMessageBox--centered"><%- __('pim_common.loading') %></div>
+<% } else { %>
+    <div class="AknMessageBox AknMessageBox--info"><%- __('acme_product_cleanup.page.explanation') %></div>
+
+    <div class="AknSubsection-title" style="display: flex; justify-content: space-between; align-items: center; gap: 16px;">
+        <span><%- __('acme_product_cleanup.widget.total', {count: data.total}, data.total) %></span>
+        <span style="display: flex; align-items: center; gap: 16px;">
+            <select class="AknSelectField acme-family-filter" style="min-width: 220px;">
+                <option value=""><%- __('acme_product_cleanup.page.all_families') %></option>
+                <% _.each(data.families, function (count, code) { %>
+                    <option value="<%- code %>" <%- code === family ? 'selected' : '' %>><%- code %> (<%- count %>)</option>
+                <% }); %>
+            </select>
+            <% if (data.can_delete && data.total > 0) { %>
+                <span class="AknButton AknButton--important acme-delete-all <%- launchedJobId ? 'AknButton--disabled' : '' %>">
+                    <%- family ? __('acme_product_cleanup.page.delete_family', {family: family}) : __('acme_product_cleanup.page.delete_all') %>
+                </span>
+            <% } %>
+        </span>
+    </div>
+
+    <% if (launchedJobId) { %>
+        <div class="AknMessageBox AknMessageBox--info">
+            <%- __('acme_product_cleanup.page.job_running') %>
+            <span class="acme-show-job" style="cursor: pointer; text-decoration: underline;"><%- __('acme_product_cleanup.page.show_job') %></span>
+        </div>
+    <% } %>
+
+    <% if (data.total > 0) { %>
+        <table class="AknGrid">
+            <thead>
+                <tr>
+                    <th class="AknGrid-headerCell"><%- __('acme_product_cleanup.column.code') %></th>
+                    <th class="AknGrid-headerCell"><%- __('acme_product_cleanup.column.label') %></th>
+                    <th class="AknGrid-headerCell"><%- __('acme_product_cleanup.column.family') %></th>
+                    <th class="AknGrid-headerCell"><%- __('acme_product_cleanup.column.family_variant') %></th>
+                    <th class="AknGrid-headerCell"><%- __('acme_product_cleanup.column.sub_models') %></th>
+                    <th class="AknGrid-headerCell"><%- __('acme_product_cleanup.column.created') %></th>
+                </tr>
+            </thead>
+            <tbody>
+            <% _.each(data.items, function (model) { %>
+                <tr class="AknGrid-bodyRow acme-show-model" data-id="<%- model.id %>">
+                    <td class="AknGrid-bodyCell"><%- model.code %></td>
+                    <td class="AknGrid-bodyCell"><%- model.label %></td>
+                    <td class="AknGrid-bodyCell"><%- model.family %></td>
+                    <td class="AknGrid-bodyCell"><%- model.family_variant %></td>
+                    <td class="AknGrid-bodyCell"><%- model.sub_models %></td>
+                    <td class="AknGrid-bodyCell"><%- model.created %></td>
+                </tr>
+            <% }); %>
+            </tbody>
+        </table>
+
+        <div style="display: flex; justify-content: center; align-items: center; gap: 16px; margin-top: 20px;">
+            <span class="AknButton AknButton--grey acme-page-previous <%- page <= 1 ? 'AknButton--disabled' : '' %>">
+                <%- __('acme_product_cleanup.page.previous') %>
+            </span>
+            <span><%- __('acme_product_cleanup.page.page_of', {page: page, pages: pageCount}) %></span>
+            <span class="AknButton AknButton--grey acme-page-next <%- page >= pageCount ? 'AknButton--disabled' : '' %>">
+                <%- __('acme_product_cleanup.page.next') %>
+            </span>
+        </div>
+    <% } %>
+<% } %>
+</div>
