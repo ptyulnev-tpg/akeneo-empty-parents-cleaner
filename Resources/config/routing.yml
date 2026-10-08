@@ -1,0 +1,13 @@
+# Frontend-Seite (wird vom JS-Router über pim/controller-registry gerendert)
+acme_empty_product_models_index:
+    path: /acme/empty-product-models
+
+acme_empty_product_models_rest_list:
+    path: /acme/rest/empty-product-models
+    defaults: { _controller: acme_product_cleanup.controller.empty_product_models:listAction, _format: json }
+    methods: [GET]
+
+acme_empty_product_models_rest_delete:
+    path: /acme/rest/empty-product-models/delete
+    defaults: { _controller: acme_product_cleanup.controller.empty_product_models:launchDeleteAction, _format: json }
+    methods: [POST]

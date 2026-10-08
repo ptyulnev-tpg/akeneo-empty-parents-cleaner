@@ -1,0 +1,15 @@
+{
+    "name": "ptyulnev-tpg/akeneo-empty-parents-cleaner",
+    "description": "Akeneo PIM 5 bundle: find and delete empty product models (root models without any variant product)",
+    "type": "symfony-bundle",
+    "license": "proprietary",
+    "require": {
+        "php": ">=7.4",
+        "akeneo/pim-community-dev": "^5.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Acme\\Bundle\\ProductCleanupBundle\\": ""
+        }
+    }
+}

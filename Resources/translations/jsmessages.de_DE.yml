@@ -1,0 +1,34 @@
+acme_product_cleanup:
+    widget:
+        total: "{0}Keine leeren Product Models|{1}1 leeres Product Model|]1,Inf[{{ count }} leere Product Models"
+        show_all: Liste anzeigen
+    column:
+        code: Code
+        label: Bezeichnung
+        family: Familie
+        family_variant: Familienvariante
+        sub_models: Leere Sub-Models
+        created: Erstellt
+        count: Leere Product Models
+    page:
+        title: Leere Product Models
+        explanation: "Root Product Models ohne jedes Varianten-Produkt (weder direkt noch unter einem Sub-Model). Einfache Produkte werden nie gelöscht."
+        all_families: Alle Familien
+        delete_all: Alle löschen
+        delete_family: "Alle aus {{ family }} löschen"
+        confirm:
+            title: Leere Product Models löschen
+            content: "{{ count }} leere Product Models werden in einem Hintergrund-Job gelöscht. Product Models mit Varianten und einfache Produkte bleiben erhalten. Das kann nicht rückgängig gemacht werden."
+            content_family: "{{ count }} leere Product Models der Familie {{ family }} werden in einem Hintergrund-Job gelöscht. Product Models mit Varianten und einfache Produkte bleiben erhalten. Das kann nicht rückgängig gemacht werden."
+        job_launched: Der Lösch-Job wurde gestartet.
+        job_running: "Die Löschung läuft im Hintergrund."
+        show_job: Im Process Tracker anzeigen
+        previous: Zurück
+        next: Weiter
+        page_of: "Seite {{ page }} von {{ pages }}"
+
+batch_jobs:
+    acme_delete_empty_product_models:
+        label: Leere Product Models löschen
+        delete_empty_product_models:
+            label: Leere Product Models löschen

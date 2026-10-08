@@ -1,0 +1,31 @@
+services:
+    Acme\Bundle\ProductCleanupBundle\Service\EmptyProductModelCleaner:
+        arguments:
+            - '@database_connection'
+            - '@pim_catalog.repository.product_model'
+            - '@pim_catalog.remover.product_model'
+            - '@pim_connector.doctrine.cache_clearer'
+
+    Acme\Bundle\ProductCleanupBundle\Command\DeleteEmptyProductModelsCommand:
+        arguments:
+            - '@Acme\Bundle\ProductCleanupBundle\Service\EmptyProductModelCleaner'
+        tags:
+            - { name: 'console.command' }
+
+    Acme\Bundle\ProductCleanupBundle\Widget\EmptyProductModelsWidget:
+        arguments:
+            - '@Acme\Bundle\ProductCleanupBundle\Service\EmptyProductModelCleaner'
+        tags:
+            - { name: 'pim_dashboard.widget', position: 40 }
+
+    acme_product_cleanup.controller.empty_product_models:
+        class: 'Acme\Bundle\ProductCleanupBundle\Controller\EmptyProductModelsController'
+        public: true
+        arguments:
+            - '@Acme\Bundle\ProductCleanupBundle\Service\EmptyProductModelCleaner'
+            - '@pim_user.context.user'
+            - '@oro_security.security_facade'
+            - '@security.token_storage'
+            - '@akeneo_batch.job.job_instance_repository'
+            - '@akeneo_batch_queue.launcher.queue_job_launcher'
+            - '%acme_product_cleanup.job_name%'

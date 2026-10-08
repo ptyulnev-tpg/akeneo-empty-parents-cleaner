@@ -1,0 +1,21 @@
+{% extends 'PimDashboardBundle:Widget:base.html.twig' %}
+
+{% set widgetTitle = 'acme_product_cleanup.widget.title'|trans %}
+
+{% set widgetContent %}
+    <div id="acme-empty-product-models-widget"></div>
+
+    <script type="text/javascript" nonce="{{ js_nonce() }}">
+        require(
+            ['jquery', 'pim/dashboard/widget-container', 'acme/product-cleanup/empty-product-models-widget'],
+            function ($, widgetContainer, EmptyProductModelsWidget) {
+                'use strict';
+                $(function () {
+                    var options = {el: '#acme-empty-product-models-widget', alias: 'acme_empty_product_models'};
+                    var widget = widgetContainer.getWidget(options, EmptyProductModelsWidget);
+                    widget.render().delayedLoad();
+                });
+            }
+        );
+    </script>
+{% endset %}

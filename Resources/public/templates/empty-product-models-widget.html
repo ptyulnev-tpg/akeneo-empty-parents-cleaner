@@ -1,0 +1,26 @@
+<% if (!_.isEmpty(data)) { %>
+    <div class="AknSubsection">
+        <div class="AknSubsection-title" style="display: flex; justify-content: space-between; align-items: center;">
+            <span><%- __('acme_product_cleanup.widget.total', {count: data.total}, data.total) %></span>
+            <span class="AknButton AknButton--small AknButton--grey acme-show-page"><%- __('acme_product_cleanup.widget.show_all') %></span>
+        </div>
+    </div>
+    <% if (data.total > 0) { %>
+        <table class="AknGrid AknGrid--unclickable">
+            <thead>
+                <tr>
+                    <th class="AknGrid-headerCell"><%- __('acme_product_cleanup.column.family') %></th>
+                    <th class="AknGrid-headerCell"><%- __('acme_product_cleanup.column.count') %></th>
+                </tr>
+            </thead>
+            <tbody>
+            <% _.each(data.families, function (count, family) { %>
+                <tr class="AknGrid-bodyRow">
+                    <td class="AknGrid-bodyCell"><%- family %></td>
+                    <td class="AknGrid-bodyCell"><%- count %></td>
+                </tr>
+            <% }); %>
+            </tbody>
+        </table>
+    <% } %>
+<% } %>
