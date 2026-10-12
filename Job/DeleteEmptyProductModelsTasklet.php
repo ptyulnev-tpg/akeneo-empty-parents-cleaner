@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace Acme\Bundle\ProductCleanupBundle\Job;
 
 use Acme\Bundle\ProductCleanupBundle\Service\EmptyProductModelCleaner;
+use Acme\Bundle\ProductCleanupBundle\Service\EmptyProductModelSelection;
 use Akeneo\Tool\Component\Batch\Job\JobRepositoryInterface;
 use Akeneo\Tool\Component\Batch\Model\StepExecution;
 use Akeneo\Tool\Component\Connector\Step\TaskletInterface;
 
 /**
- * Hintergrund-Job: löscht leere Product Models, optional nur einer Familie (Job-Parameter "family").
+ * Hintergrund-Job: löscht leere Product Models laut Job-Parametern family / limit / codes
+ * (siehe EmptyProductModelSelection).
  * Der Fortschritt wird nach jedem Batch gespeichert und ist im Process Tracker sichtbar.
  */
 final class DeleteEmptyProductModelsTasklet implements TaskletInterface
@@ -39,12 +41,17 @@ final class DeleteEmptyProductModelsTasklet implements TaskletInterface
         }
 
         $stepExecution = $this->stepExecution;
-        $family = $stepExecution->getJobParameters()->get('family');
+        $parameters = $stepExecution->getJobParameters();
+        $selection = EmptyProductModelSelection::fromArray([
+            'family' => $parameters->get('family'),
+            'limit' => $parameters->get('limit'),
+            'codes' => $parameters->get('codes'),
+        ]);
 
-        $stepExecution->setTotalItems($this->cleaner->count($family));
+        $stepExecution->setTotalItems($this->cleaner->countSelection($selection));
         $stepExecution->addSummaryInfo('deleted_product_models', 0);
 
-        $this->cleaner->delete(self::BATCH_SIZE, $family, function (int $deletedInBatch) use ($stepExecution): void {
+        $this->cleaner->delete(self::BATCH_SIZE, $selection, function (int $deletedInBatch) use ($stepExecution): void {
             $stepExecution->incrementSummaryInfo('deleted_product_models', $deletedInBatch);
             $stepExecution->incrementProcessedItems($deletedInBatch);
             $this->jobRepository->updateStepExecution($stepExecution);

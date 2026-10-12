@@ -8,20 +8,42 @@
 
     <div class="AknSubsection-title" style="display: flex; justify-content: space-between; align-items: center; gap: 16px;">
         <span><%- __('acme_product_cleanup.widget.total', {count: data.total}, data.total) %></span>
-        <span style="display: flex; align-items: center; gap: 16px;">
-            <select class="AknSelectField acme-family-filter" style="min-width: 220px;">
-                <option value=""><%- __('acme_product_cleanup.page.all_families') %></option>
-                <% _.each(data.families, function (count, code) { %>
-                    <option value="<%- code %>" <%- code === family ? 'selected' : '' %>><%- code %> (<%- count %>)</option>
-                <% }); %>
-            </select>
-            <% if (data.can_delete && data.total > 0) { %>
-                <span class="AknButton AknButton--important acme-delete-all <%- launchedJobId ? 'AknButton--disabled' : '' %>">
-                    <%- family ? __('acme_product_cleanup.page.delete_family', {family: family}) : __('acme_product_cleanup.page.delete_all') %>
-                </span>
-            <% } %>
-        </span>
+        <select class="AknSelectField acme-family-filter" style="min-width: 220px;">
+            <option value=""><%- __('acme_product_cleanup.page.all_families') %></option>
+            <% _.each(data.families, function (count, code) { %>
+                <option value="<%- code %>" <%- code === family ? 'selected' : '' %>><%- code %> (<%- count %>)</option>
+            <% }); %>
+        </select>
     </div>
+
+    <% if (data.can_delete && data.total > 0) { %>
+        <div style="display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 10px; margin: 16px 0;">
+            <% _.each(data.delete_limits, function (limit) { %>
+                <% if (limit < data.total) { %>
+                    <span class="AknButton AknButton--important acme-delete-limit <%- launchedJobId ? 'AknButton--disabled' : '' %>" data-limit="<%- limit %>">
+                        <%- __('acme_product_cleanup.page.delete_limit', {count: limit.toLocaleString()}) %>
+                    </span>
+                <% } %>
+            <% }); %>
+            <span class="AknButton AknButton--important acme-delete-all <%- launchedJobId ? 'AknButton--disabled' : '' %>">
+                <%- family ? __('acme_product_cleanup.page.delete_family', {family: family}) : __('acme_product_cleanup.page.delete_all') %>
+            </span>
+        </div>
+    <% } %>
+
+    <% if (selectedCount > 0) { %>
+        <div class="AknMessageBox AknMessageBox--warning" style="display: flex; justify-content: space-between; align-items: center; gap: 16px;">
+            <span><%- __('acme_product_cleanup.page.selected', {count: selectedCount}) %></span>
+            <span style="display: flex; gap: 10px;">
+                <span class="AknButton AknButton--grey acme-clear-selection"><%- __('acme_product_cleanup.page.clear_selection') %></span>
+                <% if (data.can_delete) { %>
+                    <span class="AknButton AknButton--important acme-delete-selected <%- launchedJobId ? 'AknButton--disabled' : '' %>">
+                        <%- __('acme_product_cleanup.page.delete_selected', {count: selectedCount}) %>
+                    </span>
+                <% } %>
+            </span>
+        </div>
+    <% } %>
 
     <% if (launchedJobId) { %>
         <div class="AknMessageBox AknMessageBox--info">
@@ -34,6 +56,11 @@
         <table class="AknGrid">
             <thead>
                 <tr>
+                    <th class="AknGrid-headerCell" style="width: 40px;">
+                        <% if (data.can_delete) { %>
+                            <input type="checkbox" class="acme-select-page" title="<%- __('acme_product_cleanup.page.select_page') %>" <%- pageSelected ? 'checked' : '' %>>
+                        <% } %>
+                    </th>
                     <th class="AknGrid-headerCell"><%- __('acme_product_cleanup.column.code') %></th>
                     <th class="AknGrid-headerCell"><%- __('acme_product_cleanup.column.label') %></th>
                     <th class="AknGrid-headerCell"><%- __('acme_product_cleanup.column.family') %></th>
@@ -45,6 +72,11 @@
             <tbody>
             <% _.each(data.items, function (model) { %>
                 <tr class="AknGrid-bodyRow acme-show-model" data-id="<%- model.id %>">
+                    <td class="AknGrid-bodyCell acme-select-cell">
+                        <% if (data.can_delete) { %>
+                            <input type="checkbox" class="acme-select-model" data-code="<%- model.code %>" <%- selected[model.code] ? 'checked' : '' %>>
+                        <% } %>
+                    </td>
                     <td class="AknGrid-bodyCell"><%- model.code %></td>
                     <td class="AknGrid-bodyCell"><%- model.label %></td>
                     <td class="AknGrid-bodyCell"><%- model.family %></td>

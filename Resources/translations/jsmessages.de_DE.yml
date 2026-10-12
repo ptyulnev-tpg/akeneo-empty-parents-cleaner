@@ -16,10 +16,19 @@ acme_product_cleanup:
         all_families: Alle Familien
         delete_all: Alle löschen
         delete_family: "Alle aus {{ family }} löschen"
+        delete_limit: "{{ count }} löschen"
+        delete_selected: "Ausgewählte löschen ({{ count }})"
+        selected: "{{ count }} Product Models ausgewählt (Auswahl bleibt beim Blättern erhalten)"
+        clear_selection: Auswahl aufheben
+        select_page: Alle auf dieser Seite auswählen
+        max_selected: "Es können höchstens {{ max }} Product Models auf einmal ausgewählt werden."
         confirm:
             title: Leere Product Models löschen
-            content: "{{ count }} leere Product Models werden in einem Hintergrund-Job gelöscht. Product Models mit Varianten und einfache Produkte bleiben erhalten. Das kann nicht rückgängig gemacht werden."
-            content_family: "{{ count }} leere Product Models der Familie {{ family }} werden in einem Hintergrund-Job gelöscht. Product Models mit Varianten und einfache Produkte bleiben erhalten. Das kann nicht rückgängig gemacht werden."
+            content: "Alle {{ count }} leeren Product Models werden in einem Hintergrund-Job gelöscht."
+            content_limit: "Die ersten {{ count }} leeren Product Models (nach Code sortiert) werden in einem Hintergrund-Job gelöscht."
+            content_selected: "Die {{ count }} ausgewählten Product Models werden in einem Hintergrund-Job gelöscht, sofern sie noch leer sind."
+            family_hint: "Nur Familie {{ family }}."
+            kept: "Product Models mit Varianten und einfache Produkte bleiben erhalten. Das kann nicht rückgängig gemacht werden."
         job_launched: Der Lösch-Job wurde gestartet.
         job_running: "Die Löschung läuft im Hintergrund."
         show_job: Im Process Tracker anzeigen

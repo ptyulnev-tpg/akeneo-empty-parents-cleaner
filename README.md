@@ -12,13 +12,19 @@ sehen dadurch immer dieselbe Menge.
 
 - **CLI** `bin/console acme:product-model:delete-empty`
   - ohne Optionen: Dry-Run, zählt je Familie, löscht nichts
-  - `--family=<code>`: nur eine Familie · `--list`: Codes ausgeben · `--batch-size=100`
+  - `--family=<code>`: nur eine Familie · `--limit=<n>`: nur die ersten n (nach Code) · `--list`: Codes ausgeben
+  - `--batch-size=100`
   - `--force`: löschen (mit Rückfrage; `-n` löscht ohne Rückfrage, z. B. für Cron)
 - **Dashboard-Widget** (Activity → Dashboard): Anzahl leerer Product Models je Familie
 - **Seite** Activity → „Empty product models“: Liste mit Familienfilter und Paging, Klick öffnet das Product Model
-- **Löschen über die UI**: „Alle (aus Familie X) löschen“ startet nach Bestätigung den Hintergrund-Job
-  `acme_delete_empty_product_models`; Fortschritt und Ergebnis im Process Tracker. Vor jedem Batch wird erneut
-  geprüft, ob die Models noch leer sind.
+- **Löschen über die UI** (jeweils nach Bestätigung als Hintergrund-Job `acme_delete_empty_product_models`,
+  Fortschritt und Ergebnis im Process Tracker, optional auf die gefilterte Familie beschränkt):
+  - „100 / 1.000 / 5.000 / 10.000 löschen“: die ersten N leeren Models nach Code (Buttons erscheinen nur, wenn
+    N kleiner als die Gesamtzahl ist)
+  - Checkboxen (einzeln oder ganze Seite, bleibt beim Blättern erhalten, max. 1.000): „Ausgewählte löschen“
+  - „Alle (aus Familie X) löschen“
+- **Sicherheit**: Auch angehakte Codes werden serverseitig mit der Regel „leer“ geschnitten, und vor jedem Batch
+  wird erneut geprüft, ob die Models noch leer sind – ein Model mit Varianten wird nie gelöscht.
 - **Rechte**: Ansehen mit `pim_enrich_product_index`, Löschen mit `pim_enrich_product_model_remove`
 
 ## Installation (Akeneo PIM CE 5.0)

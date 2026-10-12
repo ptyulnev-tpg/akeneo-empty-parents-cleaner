@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Acme\Bundle\ProductCleanupBundle\Controller;
 
 use Acme\Bundle\ProductCleanupBundle\Service\EmptyProductModelCleaner;
+use Acme\Bundle\ProductCleanupBundle\Service\EmptyProductModelSelection;
 use Akeneo\Tool\Bundle\BatchBundle\Launcher\JobLauncherInterface;
 use Akeneo\Tool\Component\StorageUtils\Repository\IdentifiableObjectRepositoryInterface;
 use Akeneo\UserManagement\Bundle\Context\UserContext;
@@ -22,6 +23,8 @@ final class EmptyProductModelsController
 {
     private const DEFAULT_LIMIT = 25;
     private const MAX_LIMIT = 100;
+    /** Feste Mengen für die Buttons "N löschen" */
+    public const DELETE_LIMITS = [100, 1000, 5000, 10000];
 
     private EmptyProductModelCleaner $cleaner;
     private UserContext $userContext;
@@ -70,6 +73,8 @@ final class EmptyProductModelsController
             'family' => $family,
             'families' => $this->cleaner->countByFamily(),
             'can_delete' => $this->securityFacade->isGranted('pim_enrich_product_model_remove'),
+            'delete_limits' => self::DELETE_LIMITS,
+            'max_selected' => EmptyProductModelSelection::MAX_CODES,
             'items' => $result['items'],
         ]);
     }
@@ -93,14 +98,49 @@ final class EmptyProductModelsController
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
-        $family = $this->familyFrom($request->request->get('family'));
+        try {
+            $selection = $this->selectionFrom($request);
+        } catch (\InvalidArgumentException $exception) {
+            return new JsonResponse(['message' => $exception->getMessage()], Response::HTTP_BAD_REQUEST);
+        }
+
         $jobExecution = $this->jobLauncher->launch(
             $jobInstance,
             $this->tokenStorage->getToken()->getUser(),
-            ['family' => $family]
+            $selection->toArray()
         );
 
-        return new JsonResponse(['job_execution_id' => $jobExecution->getId()]);
+        return new JsonResponse([
+            'job_execution_id' => $jobExecution->getId(),
+            'expected' => $this->cleaner->countSelection($selection),
+        ]);
+    }
+
+    /**
+     * Genau ein Modus: angehakte Codes, die ersten N (nur feste Mengen) oder alle – jeweils optional je Familie
+     */
+    private function selectionFrom(Request $request): EmptyProductModelSelection
+    {
+        $family = $this->familyFrom($request->request->get('family'));
+        $codes = $request->request->get('codes');
+        $limit = $request->request->get('limit');
+
+        if (null !== $codes) {
+            if (!is_array($codes)) {
+                throw new \InvalidArgumentException('"codes" must be a list.');
+            }
+
+            return EmptyProductModelSelection::ofCodes($codes, $family);
+        }
+        if (null !== $limit && '' !== $limit) {
+            if (!in_array((int) $limit, self::DELETE_LIMITS, true)) {
+                throw new \InvalidArgumentException(sprintf('"limit" must be one of %s.', implode(', ', self::DELETE_LIMITS)));
+            }
+
+            return EmptyProductModelSelection::first((int) $limit, $family);
+        }
+
+        return EmptyProductModelSelection::all($family);
     }
 
     private function familyFrom($value): ?string
