@@ -83,11 +83,17 @@ final class DeleteEmptyProductModelsCommand extends Command
             return 1;
         }
 
-        $io->progressStart($total);
-        $deleted = $this->cleaner->delete($batchSize, $selection, static function (int $deletedInBatch) use ($io): void {
-            $io->progressAdvance($deletedInBatch);
+        $deleted = $this->cleaner->delete($batchSize, $selection, static function (array $deletedInBatch) use ($io): void {
+            foreach ($deletedInBatch as $model) {
+                $io->writeln(sprintf(
+                    'deleted %s | family: %s | label: %s | empty sub-models: %d',
+                    $model['code'],
+                    $model['family'],
+                    $model['label'],
+                    $model['sub_models']
+                ));
+            }
         });
-        $io->progressFinish();
 
         $io->success(sprintf('%d empty product models deleted.', $deleted));
 

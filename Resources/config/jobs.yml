@@ -10,6 +10,7 @@ services:
         arguments:
             - '@Acme\Bundle\ProductCleanupBundle\Service\EmptyProductModelCleaner'
             - '@akeneo_batch.job_repository'
+            - '@monolog.logger.batch'
 
     acme_product_cleanup.step.delete_empty_product_models:
         class: '%pim_connector.step.tasklet.class%'

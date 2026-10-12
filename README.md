@@ -23,6 +23,9 @@ sehen dadurch immer dieselbe Menge.
     N kleiner als die Gesamtzahl ist)
   - Checkboxen (einzeln oder ganze Seite, bleibt beim Blättern erhalten, max. 1.000): „Ausgewählte löschen“
   - „Alle (aus Familie X) löschen“
+- **Protokoll**: Jedes gelöschte Model steht mit Code, Familie, Bezeichnung und Anzahl leerer Sub-Models in der
+  Job-Log-Datei (Process Tracker → „Download log“), dazu User und Auswahl des Auftrags. Die CLI gibt dieselbe Liste
+  aus. Zusätzlich legt Akeneo pro gelöschtem Model einen Eintrag „Deleted“ in `pim_versioning_version` an.
 - **Sicherheit**: Auch angehakte Codes werden serverseitig mit der Regel „leer“ geschnitten, und vor jedem Batch
   wird erneut geprüft, ob die Models noch leer sind – ein Model mit Varianten wird nie gelöscht.
 - **Rechte**: Ansehen mit `pim_enrich_product_index`, Löschen mit `pim_enrich_product_model_remove`
