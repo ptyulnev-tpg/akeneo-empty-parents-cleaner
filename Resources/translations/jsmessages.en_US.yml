@@ -16,10 +16,19 @@ acme_product_cleanup:
         all_families: All families
         delete_all: Delete all
         delete_family: "Delete all of {{ family }}"
+        delete_limit: "Delete {{ count }}"
+        delete_selected: "Delete selected ({{ count }})"
+        selected: "{{ count }} product models selected (selection is kept when paging)"
+        clear_selection: Clear selection
+        select_page: Select all on this page
+        max_selected: "At most {{ max }} product models can be selected at once."
         confirm:
             title: Delete empty product models
-            content: "{{ count }} empty product models will be deleted in a background job. Product models with variants and simple products are kept. This cannot be undone."
-            content_family: "{{ count }} empty product models of family {{ family }} will be deleted in a background job. Product models with variants and simple products are kept. This cannot be undone."
+            content: "All {{ count }} empty product models will be deleted in a background job."
+            content_limit: "The first {{ count }} empty product models (ordered by code) will be deleted in a background job."
+            content_selected: "The {{ count }} selected product models will be deleted in a background job, if they are still empty."
+            family_hint: "Only family {{ family }}."
+            kept: "Product models with variants and simple products are kept. This cannot be undone."
         job_launched: The deletion job has been launched.
         job_running: "Deletion is running in the background."
         show_job: Show in process tracker

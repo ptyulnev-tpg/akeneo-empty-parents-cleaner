@@ -58,9 +58,18 @@ final class EmptyProductModelCleaner
 
     public function count(?string $familyCode = null): int
     {
-        [$where, $params] = $this->where($familyCode);
+        return $this->countSelection(EmptyProductModelSelection::all($familyCode));
+    }
 
-        return (int) $this->connection->fetchColumn('SELECT COUNT(*) ' . self::FROM . ' WHERE ' . $where, $params);
+    /**
+     * Anzahl, die eine Löschung dieser Auswahl betreffen würde
+     */
+    public function countSelection(EmptyProductModelSelection $selection): int
+    {
+        [$where, $params, $types] = $this->where($selection);
+        $count = (int) $this->connection->fetchColumn('SELECT COUNT(*) ' . self::FROM . ' WHERE ' . $where, $params, 0, $types);
+
+        return null === $selection->limit() ? $count : min($count, $selection->limit());
     }
 
     /**
@@ -77,14 +86,18 @@ final class EmptyProductModelCleaner
     }
 
     /**
+     * Codes der Auswahl, sortiert nach Code (bei "die ersten N" also die ersten N nach Code)
+     *
      * @return iterable<string>
      */
-    public function findCodes(?string $familyCode = null): iterable
+    public function findCodes(EmptyProductModelSelection $selection): iterable
     {
-        [$where, $params] = $this->where($familyCode);
+        [$where, $params, $types] = $this->where($selection);
         $statement = $this->connection->executeQuery(
-            'SELECT pm.code ' . self::FROM . ' WHERE ' . $where . ' ORDER BY pm.code',
-            $params
+            'SELECT pm.code ' . self::FROM . ' WHERE ' . $where . ' ORDER BY pm.code'
+            . (null === $selection->limit() ? '' : sprintf(' LIMIT %d', $selection->limit())),
+            $params,
+            $types
         );
 
         while (false !== ($code = $statement->fetchColumn())) {
@@ -101,13 +114,14 @@ final class EmptyProductModelCleaner
             throw new \InvalidArgumentException('Page and limit must be at least 1.');
         }
 
-        [$where, $params] = $this->where($familyCode);
+        [$where, $params, $types] = $this->where(EmptyProductModelSelection::all($familyCode));
         $rows = $this->connection->fetchAll(
             'SELECT pm.id, pm.code, f.code AS family, fv.code AS family_variant, pm.created,'
             . ' (SELECT COUNT(*) FROM pim_catalog_product_model sub WHERE sub.parent_id = pm.id) AS sub_models '
             . self::FROM . ' WHERE ' . $where
             . sprintf(' ORDER BY pm.code LIMIT %d OFFSET %d', $limit, ($page - 1) * $limit),
-            $params
+            $params,
+            $types
         );
 
         $labels = $this->labelsByCode(array_column($rows, 'code'), $localeCode);
@@ -129,14 +143,14 @@ final class EmptyProductModelCleaner
      *
      * @return int Anzahl gelöschter Root Product Models
      */
-    public function delete(int $batchSize, ?string $familyCode = null, ?callable $onBatchDeleted = null): int
+    public function delete(int $batchSize, EmptyProductModelSelection $selection, ?callable $onBatchDeleted = null): int
     {
         if ($batchSize < 1) {
             throw new \InvalidArgumentException('The batch size must be at least 1.');
         }
 
         // Codes vorab einsammeln (stabile Menge, kein Offset-Paging über eine schrumpfende Tabelle)
-        $codes = iterator_to_array($this->findCodes($familyCode), false);
+        $codes = iterator_to_array($this->findCodes($selection), false);
         $deleted = 0;
 
         foreach (array_chunk($codes, $batchSize) as $batch) {
@@ -175,15 +189,28 @@ final class EmptyProductModelCleaner
     }
 
     /**
-     * @return array{0: string, 1: array<string, string>}
+     * WHERE-Teil für eine Auswahl: immer DEAD_ROOT_CONDITION, eingeschränkt nach Familie und/oder Codes.
+     * Das LIMIT einer Auswahl setzt der Aufrufer (es hängt von der Sortierung ab).
+     *
+     * @return array{0: string, 1: array<string, mixed>, 2: array<string, int>}
      */
-    private function where(?string $familyCode): array
+    private function where(EmptyProductModelSelection $selection): array
     {
-        if (null === $familyCode || '' === $familyCode) {
-            return [self::DEAD_ROOT_CONDITION, []];
+        $where = self::DEAD_ROOT_CONDITION;
+        $params = [];
+        $types = [];
+
+        if (null !== $selection->family()) {
+            $where .= ' AND f.code = :family';
+            $params['family'] = $selection->family();
+        }
+        if (null !== $selection->codes()) {
+            $where .= ' AND pm.code IN (:codes)';
+            $params['codes'] = $selection->codes();
+            $types['codes'] = Connection::PARAM_STR_ARRAY;
         }
 
-        return [self::DEAD_ROOT_CONDITION . ' AND f.code = :family', ['family' => $familyCode]];
+        return [$where, $params, $types];
     }
 
     /**
