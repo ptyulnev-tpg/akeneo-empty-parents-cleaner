@@ -139,7 +139,8 @@ final class EmptyProductModelCleaner
     }
 
     /**
-     * @param callable(int $deletedInBatch): void|null $onBatchDeleted
+     * @param callable(list<array{code: string, family: string, label: string, sub_models: int}> $deletedInBatch): void|null $onBatchDeleted
+     *        wird nach jedem Batch mit den gelöschten Root-Models aufgerufen (für Protokollierung)
      *
      * @return int Anzahl gelöschter Root Product Models
      */
@@ -162,12 +163,20 @@ final class EmptyProductModelCleaner
 
             /** @var ProductModelInterface[] $productModels */
             $productModels = $this->productModelRepository->findByIdentifiers($stillEmpty);
+            // Vor dem Löschen festhalten, was gelöscht wird (danach sind die Entities weg)
+            $deletedInBatch = array_map(static fn (ProductModelInterface $productModel): array => [
+                'code' => $productModel->getCode(),
+                'family' => null !== $productModel->getFamily() ? $productModel->getFamily()->getCode() : '',
+                'label' => $productModel->getLabel(),
+                'sub_models' => $productModel->getProductModels()->count(),
+            ], $productModels);
+
             $this->productModelRemover->removeAll($productModels);
             $this->cacheClearer->clear();
 
-            $deleted += count($productModels);
+            $deleted += count($deletedInBatch);
             if (null !== $onBatchDeleted) {
-                $onBatchDeleted(count($productModels));
+                $onBatchDeleted($deletedInBatch);
             }
         }
 
