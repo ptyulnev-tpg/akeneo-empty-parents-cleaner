@@ -9,6 +9,15 @@ acme_product_cleanup:
         family_variant: Familienvariante
         sub_models: Leere Sub-Models
         created: Erstellt
+        identifier: Identifier
+        status: Status
+        enabled: Aktiv
+        disabled: Inaktiv
+        updated: Geändert
+        deleted_at: Gelöscht am
+        type: Typ
+        deleted_by: Gelöscht von
+        context: Herkunft
         count: Leere Product Models
     page:
         title: Leere Product Models
@@ -36,8 +45,29 @@ acme_product_cleanup:
         next: Weiter
         page_of: "Seite {{ page }} von {{ pages }}"
 
+    without_family:
+        title: Produkte ohne Familie
+        explanation: "Einfache Produkte ohne Familie. Varianten-Produkte haben immer eine Familie und sind nie betroffen. Jede Löschung wird protokolliert:"
+        total: "{0}Keine Produkte ohne Familie|{1}1 Produkt ohne Familie|]1,Inf[{{ count }} Produkte ohne Familie"
+        confirm:
+            title: Produkte ohne Familie löschen
+            content: "{{ count }} Produkte ohne Familie werden in einem Hintergrund-Job gelöscht. Jede Löschung wird im Lösch-Log protokolliert. Das kann nicht rückgängig gemacht werden."
+    deletion_log:
+        title: Lösch-Log
+        explanation: "Alle gelöschten Produkte und Product Models, egal ob über die Oberfläche, die API, einen Job oder die Kommandozeile gelöscht. Die Rohwerte jedes Artikels sind in der Tabelle acme_product_cleanup_deletion_log gespeichert."
+        total: "{0}Keine Einträge|{1}1 Eintrag|]1,Inf[{{ count }} Einträge"
+        search: Identifier, Bezeichnung oder Benutzer
+        all_types: Alle Typen
+        type:
+            product: Produkt
+            product_model: Product Model
+
 batch_jobs:
     acme_delete_empty_product_models:
         label: Leere Product Models löschen
         delete_empty_product_models:
             label: Leere Product Models löschen
+    acme_delete_products_without_family:
+        label: Produkte ohne Familie löschen
+        delete_products_without_family:
+            label: Produkte ohne Familie löschen

@@ -7,3 +7,7 @@ batch_jobs:
         label: Leere Product Models löschen
         delete_empty_product_models:
             label: Leere Product Models löschen
+    acme_delete_products_without_family:
+        label: Produkte ohne Familie löschen
+        delete_products_without_family:
+            label: Produkte ohne Familie löschen

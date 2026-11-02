@@ -1,0 +1,47 @@
+extensions:
+    # Menüeintrag unter Activity
+    acme-menu-activity-deletion-log:
+        module: pim/menu/item
+        parent: pim-menu-activity-navigation-block
+        aclResourceId: pim_enrich_product_index
+        position: 140
+        config:
+            title: acme_product_cleanup.deletion_log.title
+            to: acme_deletion_log_index
+
+    # Seite
+    acme-deletion-log-index:
+        module: pim/common/simple-view
+        config:
+            template: pim/template/common/default-template
+
+    acme-deletion-log-index-user-navigation:
+        module: pim/menu/user-navigation
+        parent: acme-deletion-log-index
+        targetZone: user-menu
+        config:
+            userAccount: pim_menu.user.user_account
+            logout: pim_menu.user.logout
+
+    acme-deletion-log-index-title:
+        module: pim/common/grid-title
+        parent: acme-deletion-log-index
+        targetZone: title
+        config:
+            countable: false
+            title: acme_product_cleanup.deletion_log.title
+
+    acme-deletion-log-index-breadcrumbs:
+        module: pim/common/breadcrumbs
+        parent: acme-deletion-log-index
+        targetZone: breadcrumbs
+        config:
+            tab: pim-menu-activity
+            item: acme-menu-activity-deletion-log
+
+    acme-deletion-log-index-content:
+        module: acme/product-cleanup/view/deletion-log
+        parent: acme-deletion-log-index
+        targetZone: content
+        config:
+            limit: 25

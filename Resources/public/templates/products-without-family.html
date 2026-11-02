@@ -1,0 +1,61 @@
+<div class="AknSubsection">
+<% if (error) { %>
+    <div class="AknMessageBox AknMessageBox--error"><%- error %></div>
+<% } else if (null === data) { %>
+    <div class="AknMessageBox AknMessageBox--centered"><%- __('pim_common.loading') %></div>
+<% } else { %>
+    <div class="AknMessageBox AknMessageBox--info">
+        <%- __('acme_product_cleanup.without_family.explanation') %>
+        <span class="acme-show-log" style="cursor: pointer; text-decoration: underline;"><%- __('acme_product_cleanup.deletion_log.title') %></span>
+    </div>
+
+    <div class="AknSubsection-title" style="display: flex; justify-content: space-between; align-items: center; gap: 16px;">
+        <span><%- __('acme_product_cleanup.without_family.total', {count: data.total}, data.total) %></span>
+        <% if (data.can_delete && data.total > 0) { %>
+            <span class="AknButton AknButton--important acme-delete-all <%- launchedJobId ? 'AknButton--disabled' : '' %>">
+                <%- __('acme_product_cleanup.page.delete_all') %>
+            </span>
+        <% } %>
+    </div>
+
+    <% if (launchedJobId) { %>
+        <div class="AknMessageBox AknMessageBox--info">
+            <%- __('acme_product_cleanup.page.job_running') %>
+            <span class="acme-show-job" style="cursor: pointer; text-decoration: underline;"><%- __('acme_product_cleanup.page.show_job') %></span>
+        </div>
+    <% } %>
+
+    <% if (data.total > 0) { %>
+        <table class="AknGrid">
+            <thead>
+                <tr>
+                    <th class="AknGrid-headerCell"><%- __('acme_product_cleanup.column.identifier') %></th>
+                    <th class="AknGrid-headerCell"><%- __('acme_product_cleanup.column.status') %></th>
+                    <th class="AknGrid-headerCell"><%- __('acme_product_cleanup.column.created') %></th>
+                    <th class="AknGrid-headerCell"><%- __('acme_product_cleanup.column.updated') %></th>
+                </tr>
+            </thead>
+            <tbody>
+            <% _.each(data.items, function (product) { %>
+                <tr class="AknGrid-bodyRow acme-show-product" data-id="<%- product.id %>">
+                    <td class="AknGrid-bodyCell"><%- product.identifier %></td>
+                    <td class="AknGrid-bodyCell"><%- product.enabled ? __('acme_product_cleanup.column.enabled') : __('acme_product_cleanup.column.disabled') %></td>
+                    <td class="AknGrid-bodyCell"><%- product.created %></td>
+                    <td class="AknGrid-bodyCell"><%- product.updated %></td>
+                </tr>
+            <% }); %>
+            </tbody>
+        </table>
+
+        <div style="display: flex; justify-content: center; align-items: center; gap: 16px; margin-top: 20px;">
+            <span class="AknButton AknButton--grey acme-page-previous <%- page <= 1 ? 'AknButton--disabled' : '' %>">
+                <%- __('acme_product_cleanup.page.previous') %>
+            </span>
+            <span><%- __('acme_product_cleanup.page.page_of', {page: page, pages: pageCount}) %></span>
+            <span class="AknButton AknButton--grey acme-page-next <%- page >= pageCount ? 'AknButton--disabled' : '' %>">
+                <%- __('acme_product_cleanup.page.next') %>
+            </span>
+        </div>
+    <% } %>
+<% } %>
+</div>

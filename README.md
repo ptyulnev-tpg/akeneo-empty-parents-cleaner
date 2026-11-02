@@ -30,6 +30,23 @@ sehen dadurch immer dieselbe Menge.
   wird erneut geprüft, ob die Models noch leer sind – ein Model mit Varianten wird nie gelöscht.
 - **Rechte**: Ansehen mit `pim_enrich_product_index`, Löschen mit `pim_enrich_product_model_remove`
 
+### Produkte ohne Familie
+
+- **CLI** `bin/console acme:product:delete-without-family`: ohne Optionen Dry-Run · `--list` · `--force` (mit `-n` ohne Rückfrage)
+- **Seite** Activity → „Produkte ohne Familie“: Liste mit Paging, Klick öffnet das Produkt, „Alle löschen“ startet den
+  Job `acme_delete_products_without_family` (Process Tracker). Vor jedem Batch wird erneut geprüft.
+- Varianten-Produkte haben immer eine Familie und sind nie betroffen.
+- **Rechte**: Ansehen mit `pim_enrich_product_index`, Löschen mit `pim_enrich_product_remove`
+
+### Lösch-Log
+
+- `EventSubscriber/LogDeletionSubscriber` protokolliert **jede** Löschung eines Produkts oder Product Models, egal ob
+  über UI, REST API, Massen-Job oder CLI, mit Zeit (UTC), Identifier, Bezeichnung, Familie, Benutzer, Herkunft
+  (Request-Pfad bzw. Konsolenbefehl) und den Rohwerten (`raw_values`, JSON).
+- Tabelle `acme_product_cleanup_deletion_log`, wird beim ersten Zugriff automatisch angelegt.
+- **Seite** Activity → „Lösch-Log“: neueste zuerst, Filter nach Typ, Suche nach Identifier/Bezeichnung/Benutzer.
+- Ein Fehler beim Protokollieren blockiert die Löschung nicht, er landet im Akeneo-Log.
+
 ## Installation (Akeneo PIM CE 5.0)
 
 1. Code nach `src/Acme/Bundle/ProductCleanupBundle` legen (oder per Composer, siehe `composer.json`).
@@ -45,6 +62,7 @@ sehen dadurch immer dieselbe Menge.
 4. Job-Instanz einmalig anlegen:
    ```bash
    bin/console akeneo:batch:create-job "Acme Product Cleanup" acme_delete_empty_product_models mass_delete acme_delete_empty_product_models '{"family":null}' "Delete empty product models"
+   bin/console akeneo:batch:create-job "Acme Product Cleanup" acme_delete_products_without_family mass_delete acme_delete_products_without_family '{"family":null}' "Delete products without family"
    ```
 5. Cache leeren und Frontend bauen – Reihenfolge beachten (`pim:installer:assets --clean` löscht `public/css`):
    ```bash

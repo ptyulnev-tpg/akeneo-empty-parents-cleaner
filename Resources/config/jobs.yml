@@ -1,5 +1,6 @@
 parameters:
     acme_product_cleanup.job_name: 'acme_delete_empty_product_models'
+    acme_product_cleanup.products_without_family_job_name: 'acme_delete_products_without_family'
     acme_product_cleanup.connector_name: 'Acme Product Cleanup'
     # Bestehender Typ, damit Process Tracker & Übersetzungen ohne Zusatzaufwand funktionieren
     acme_product_cleanup.job_type: 'mass_delete'
@@ -31,10 +32,36 @@ services:
         tags:
             - { name: akeneo_batch.job, connector: '%acme_product_cleanup.connector_name%', type: '%acme_product_cleanup.job_type%' }
 
+    acme_product_cleanup.tasklet.delete_products_without_family:
+        class: 'Acme\Bundle\ProductCleanupBundle\Job\DeleteProductsWithoutFamilyTasklet'
+        arguments:
+            - '@Acme\Bundle\ProductCleanupBundle\Service\ProductsWithoutFamilyCleaner'
+            - '@akeneo_batch.job_repository'
+
+    acme_product_cleanup.step.delete_products_without_family:
+        class: '%pim_connector.step.tasklet.class%'
+        arguments:
+            - 'delete_products_without_family'
+            - '@event_dispatcher'
+            - '@akeneo_batch.job_repository'
+            - '@acme_product_cleanup.tasklet.delete_products_without_family'
+
+    acme_product_cleanup.job.delete_products_without_family:
+        class: '%pim_connector.job.simple_job.class%'
+        arguments:
+            - '%acme_product_cleanup.products_without_family_job_name%'
+            - '@event_dispatcher'
+            - '@akeneo_batch.job_repository'
+            -
+                - '@acme_product_cleanup.step.delete_products_without_family'
+        tags:
+            - { name: akeneo_batch.job, connector: '%acme_product_cleanup.connector_name%', type: '%acme_product_cleanup.job_type%' }
+
+    # Parameter-Provider für beide Jobs (Parameter "family", beim Job ohne Familie ungenutzt)
     acme_product_cleanup.job.parameters:
         class: 'Acme\Bundle\ProductCleanupBundle\Job\JobParameters\DeleteEmptyProductModelsParameters'
         arguments:
-            - ['%acme_product_cleanup.job_name%']
+            - ['%acme_product_cleanup.job_name%', '%acme_product_cleanup.products_without_family_job_name%']
         tags:
             - { name: akeneo_batch.job.job_parameters.constraint_collection_provider }
             - { name: akeneo_batch.job.job_parameters.default_values_provider }

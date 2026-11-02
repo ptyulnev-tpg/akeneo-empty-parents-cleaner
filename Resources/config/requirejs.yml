@@ -5,10 +5,22 @@ config:
         acme/product-cleanup/controller/empty-product-models: acmeproductcleanup/js/controller/empty-product-models
         acme/product-cleanup/view/empty-product-models: acmeproductcleanup/js/view/empty-product-models
         acme/product-cleanup/template/empty-product-models: acmeproductcleanup/templates/empty-product-models.html
+        acme/product-cleanup/controller/products-without-family: acmeproductcleanup/js/controller/products-without-family
+        acme/product-cleanup/view/products-without-family: acmeproductcleanup/js/view/products-without-family
+        acme/product-cleanup/template/products-without-family: acmeproductcleanup/templates/products-without-family.html
+        acme/product-cleanup/controller/deletion-log: acmeproductcleanup/js/controller/deletion-log
+        acme/product-cleanup/view/deletion-log: acmeproductcleanup/js/view/deletion-log
+        acme/product-cleanup/template/deletion-log: acmeproductcleanup/templates/deletion-log.html
 
     config:
         pim/controller-registry:
             controllers:
                 acme_empty_product_models_index:
                     module: acme/product-cleanup/controller/empty-product-models
+                    aclResourceId: pim_enrich_product_index
+                acme_products_without_family_index:
+                    module: acme/product-cleanup/controller/products-without-family
+                    aclResourceId: pim_enrich_product_index
+                acme_deletion_log_index:
+                    module: acme/product-cleanup/controller/deletion-log
                     aclResourceId: pim_enrich_product_index

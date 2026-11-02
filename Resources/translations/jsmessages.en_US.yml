@@ -9,6 +9,15 @@ acme_product_cleanup:
         family_variant: Family variant
         sub_models: Empty sub-models
         created: Created
+        identifier: Identifier
+        status: Status
+        enabled: Enabled
+        disabled: Disabled
+        updated: Updated
+        deleted_at: Deleted at
+        type: Type
+        deleted_by: Deleted by
+        context: Source
         count: Empty product models
     page:
         title: Empty product models
@@ -36,8 +45,29 @@ acme_product_cleanup:
         next: Next
         page_of: "Page {{ page }} of {{ pages }}"
 
+    without_family:
+        title: Products without family
+        explanation: "Simple products without family. Variant products always have a family and are never affected. Every deletion is logged:"
+        total: "{0}No products without family|{1}1 product without family|]1,Inf[{{ count }} products without family"
+        confirm:
+            title: Delete products without family
+            content: "{{ count }} products without family will be deleted in a background job. Every deletion is recorded in the deletion log. This cannot be undone."
+    deletion_log:
+        title: Deletion log
+        explanation: "All deleted products and product models, whether deleted via the UI, the API, a job or the command line. The raw values of each item are stored in the table acme_product_cleanup_deletion_log."
+        total: "{0}No entries|{1}1 entry|]1,Inf[{{ count }} entries"
+        search: Identifier, label or user
+        all_types: All types
+        type:
+            product: Product
+            product_model: Product model
+
 batch_jobs:
     acme_delete_empty_product_models:
         label: Delete empty product models
         delete_empty_product_models:
             label: Delete empty product models
+    acme_delete_products_without_family:
+        label: Delete products without family
+        delete_products_without_family:
+            label: Delete products without family

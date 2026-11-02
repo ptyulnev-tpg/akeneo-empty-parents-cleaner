@@ -1,0 +1,47 @@
+extensions:
+    # Menüeintrag unter Activity
+    acme-menu-activity-products-without-family:
+        module: pim/menu/item
+        parent: pim-menu-activity-navigation-block
+        aclResourceId: pim_enrich_product_index
+        position: 130
+        config:
+            title: acme_product_cleanup.without_family.title
+            to: acme_products_without_family_index
+
+    # Seite
+    acme-products-without-family-index:
+        module: pim/common/simple-view
+        config:
+            template: pim/template/common/default-template
+
+    acme-products-without-family-index-user-navigation:
+        module: pim/menu/user-navigation
+        parent: acme-products-without-family-index
+        targetZone: user-menu
+        config:
+            userAccount: pim_menu.user.user_account
+            logout: pim_menu.user.logout
+
+    acme-products-without-family-index-title:
+        module: pim/common/grid-title
+        parent: acme-products-without-family-index
+        targetZone: title
+        config:
+            countable: false
+            title: acme_product_cleanup.without_family.title
+
+    acme-products-without-family-index-breadcrumbs:
+        module: pim/common/breadcrumbs
+        parent: acme-products-without-family-index
+        targetZone: breadcrumbs
+        config:
+            tab: pim-menu-activity
+            item: acme-menu-activity-products-without-family
+
+    acme-products-without-family-index-content:
+        module: acme/product-cleanup/view/products-without-family
+        parent: acme-products-without-family-index
+        targetZone: content
+        config:
+            limit: 25
