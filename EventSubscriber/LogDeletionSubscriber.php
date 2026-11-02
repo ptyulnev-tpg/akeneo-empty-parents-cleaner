@@ -7,6 +7,8 @@ namespace Acme\Bundle\ProductCleanupBundle\EventSubscriber;
 use Acme\Bundle\ProductCleanupBundle\Service\DeletionLog;
 use Akeneo\Pim\Enrichment\Component\Product\Model\ProductInterface;
 use Akeneo\Pim\Enrichment\Component\Product\Model\ProductModelInterface;
+use Akeneo\Tool\Component\Batch\Event\EventInterface;
+use Akeneo\Tool\Component\Batch\Event\JobExecutionEvent;
 use Akeneo\Tool\Component\StorageUtils\StorageEvents;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -30,6 +32,10 @@ final class LogDeletionSubscriber implements EventSubscriberInterface
     /** @var array<int, array> spl_object_id => Log-Eintrag */
     private array $pending = [];
 
+    /** Benutzer und Bezeichnung des laufenden Hintergrund-Jobs (Jobs laufen sonst unter "system") */
+    private ?string $jobUser = null;
+    private ?string $jobContext = null;
+
     public function __construct(
         DeletionLog $deletionLog,
         TokenStorageInterface $tokenStorage,
@@ -47,7 +53,23 @@ final class LogDeletionSubscriber implements EventSubscriberInterface
         return [
             StorageEvents::PRE_REMOVE => 'collect',
             StorageEvents::POST_REMOVE => 'write',
+            EventInterface::BEFORE_JOB_EXECUTION => 'startJob',
+            EventInterface::AFTER_JOB_EXECUTION => 'endJob',
         ];
+    }
+
+    public function startJob(JobExecutionEvent $event): void
+    {
+        $jobExecution = $event->getJobExecution();
+        $jobInstance = $jobExecution->getJobInstance();
+        $this->jobUser = $jobExecution->getUser();
+        $this->jobContext = sprintf('job %s #%s', null === $jobInstance ? '?' : $jobInstance->getCode(), $jobExecution->getId());
+    }
+
+    public function endJob(): void
+    {
+        $this->jobUser = null;
+        $this->jobContext = null;
     }
 
     public function collect(GenericEvent $event): void
@@ -102,6 +124,10 @@ final class LogDeletionSubscriber implements EventSubscriberInterface
 
     private function currentUsername(): ?string
     {
+        if (null !== $this->jobUser) {
+            return $this->jobUser;
+        }
+
         $token = $this->tokenStorage->getToken();
         $user = null === $token ? null : $token->getUser();
 
@@ -110,6 +136,10 @@ final class LogDeletionSubscriber implements EventSubscriberInterface
 
     private function currentContext(): ?string
     {
+        if (null !== $this->jobContext) {
+            return $this->jobContext;
+        }
+
         $request = $this->requestStack->getCurrentRequest();
         if (null !== $request) {
             return $request->getMethod() . ' ' . $request->getPathInfo();

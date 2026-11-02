@@ -42,7 +42,7 @@ sehen dadurch immer dieselbe Menge.
 
 - `EventSubscriber/LogDeletionSubscriber` protokolliert **jede** Löschung eines Produkts oder Product Models, egal ob
   über UI, REST API, Massen-Job oder CLI, mit Zeit (UTC), Identifier, Bezeichnung, Familie, Benutzer, Herkunft
-  (Request-Pfad bzw. Konsolenbefehl) und den Rohwerten (`raw_values`, JSON).
+  (Request-Pfad, Konsolenbefehl bzw. Job mit dem Benutzer, der ihn gestartet hat) und den Rohwerten (`raw_values`, JSON).
 - Tabelle `acme_product_cleanup_deletion_log`, wird beim ersten Zugriff automatisch angelegt.
 - **Seite** Activity → „Lösch-Log“: neueste zuerst, Filter nach Typ, Suche nach Identifier/Bezeichnung/Benutzer.
 - Ein Fehler beim Protokollieren blockiert die Löschung nicht, er landet im Akeneo-Log.
